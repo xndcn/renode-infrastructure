@@ -48,6 +48,8 @@ namespace Antmicro.Renode.UI
 #if !GUI_DISABLED
 #if PLATFORM_WINDOWS
                 Application.Initialize(ToolkitType.Wpf);
+#elif NET
+                Application.Initialize(ToolkitType.Gtk3);
 #else
                 Application.Initialize(ToolkitType.Gtk);
 #endif
