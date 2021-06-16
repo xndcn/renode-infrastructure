@@ -7,6 +7,7 @@
 using System;
 using Antmicro.Renode.Peripherals.Bus;
 using Antmicro.Renode.Core;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.Tests.UnitTests.Mocks
 {

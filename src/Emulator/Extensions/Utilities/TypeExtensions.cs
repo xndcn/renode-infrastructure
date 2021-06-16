@@ -17,6 +17,7 @@ using Dynamitey;
 using Antmicro.Renode.Time;
 using Antmicro.Renode.UserInterface;
 using Antmicro.Renode.Utilities.Collections;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.Utilities
 {

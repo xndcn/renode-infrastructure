@@ -34,6 +34,7 @@ using ELFSharp.ELF;
 using ELFSharp.UImage;
 using Machine = Antmicro.Renode.Core.Machine;
 using Antmicro.Renode.Disassembler.LLVM;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.Peripherals.CPU
 {

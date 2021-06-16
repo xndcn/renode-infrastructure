@@ -9,6 +9,7 @@
 using System.Linq;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Exceptions;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.UserInterface.Tokenizer
 {

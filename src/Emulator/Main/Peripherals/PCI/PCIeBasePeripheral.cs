@@ -16,6 +16,7 @@ using Antmicro.Renode.Peripherals.Bus;
 using Antmicro.Renode.Peripherals.PCI.BAR;
 using Antmicro.Renode.Peripherals.PCI.Capabilities;
 using Antmicro.Renode.Utilities;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.Peripherals.PCI
 {

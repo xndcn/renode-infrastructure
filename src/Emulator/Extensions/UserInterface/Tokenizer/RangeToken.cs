@@ -8,6 +8,7 @@
 using System;
 using Antmicro.Renode.Core;
 using System.Linq;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.UserInterface.Tokenizer
 {

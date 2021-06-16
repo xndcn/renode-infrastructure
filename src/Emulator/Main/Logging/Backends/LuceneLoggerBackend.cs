@@ -25,6 +25,7 @@ using Lucene.Net.Store;
 using System.Runtime.Serialization;
 using LuceneNet = Lucene.Net;
 using Antmicro.Renode.Logging.Lucene;
+using Range = Antmicro.Renode.Logging.Lucene.Range;
 
 namespace Antmicro.Renode.Logging.Backends
 {

@@ -21,6 +21,7 @@ using System.Collections;
 using Antmicro.Renode.Utilities;
 using System.Text.RegularExpressions;
 using Antmicro.Renode.Peripherals.Memory;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.MonitorTests.CommandTests
 {

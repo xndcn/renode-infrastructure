@@ -12,6 +12,7 @@ using Antmicro.Renode.UserInterface.Tokenizer;
 using System.Linq;
 using Antmicro.Renode.Exceptions;
 using Antmicro.Renode.Core;
+using Range = Antmicro.Renode.Core.Range;
 
 namespace Antmicro.Renode.MonitorTests
 {
