@@ -161,7 +161,11 @@ namespace Antmicro.Renode.HostInterfaces.Network
                 {
                     var process = new Process();
                     var output = string.Empty;
+                #if NET
+                    process.StartInfo.FileName = "dotnet";
+                #else
                     process.StartInfo.FileName = "mono";
+                #endif
                     process.StartInfo.Arguments = string.Format("{0} {1} true", DynamicModuleSpawner.GetTAPHelper(), deviceName);
 
                     try
