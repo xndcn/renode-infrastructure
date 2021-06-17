@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Deterministic>false</Deterministic>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,7 +20,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Antmicro.Renode.Plugins.SampleCommandPlugin</RootNamespace>
     <AssemblyName>SampleCommandPlugin</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(NET) != 'true'">v4.5</TargetFrameworkVersion>
     <PropertiesLocation>..\..\..\..\..\output\properties.csproj</PropertiesLocation>
   </PropertyGroup>
   <Import Project="$(PropertiesLocation)" />
@@ -31,14 +42,14 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="$(NET) != 'true'">
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SampleCommandPlugin.cs" />
     <Compile Include="HelloCommand.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="$(NET) != 'true'"/>
   <ItemGroup>
     <ProjectReference Include="..\..\Emulator\Main\Emulator.csproj">
       <Project>{2901AECB-A54F-4FD8-9AC1-033D86DC7257}</Project>
@@ -66,4 +77,5 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'" />
 </Project>

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CCompilerTask" />
-    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CLinkerTask" />
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CCompilerTask" Condition="$(NET) != 'true'"/>
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CLinkerTask" Condition="$(NET) != 'true'"/>
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/net5.0/CCTask.dll" TaskName="CCompilerTask" Condition="$(NET) == 'true'"/>
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/net5.0/CCTask.dll" TaskName="CLinkerTask" Condition="$(NET) == 'true'"/>
 
   <Target Name="VerifyProperties">
     <Error Text="The compiler must be explicitly provided when compiling on macOS." Condition="$(CompilerPath) == '' and $(CurrentPlatform) == 'OSX'"/>
@@ -123,11 +125,13 @@
 
   <Target Name="Compile" DependsOnTargets="_PrepareInputsAndOutputsForCompilation;GenerateFlags;CompileTcg" Inputs="@(InputFiles)" Outputs="@(ObjectFiles)" >
     <CCompilerTask CompilerPath="$(CompilerPath)" Parallel="true" Sources="@(SourceFiles)" Flags="@(CompilationFlags)" ObjectFilesDirectory="$(ObjectFilesDirectory)" />
+    <Exec Command="sleep 5" Condition="$(NET) == 'true' And $(CurrentPlatform) != 'Windows' "/>
+    <Exec Command="powershell &quot;sleep 5&quot;" Condition="$(NET) == 'true' And $(CurrentPlatform) == 'Windows' "/>
   </Target>
 
   <Target Name="Link" DependsOnTargets="Compile" Inputs="@(ObjectFiles)" Outputs="$(SoFileLocation)/$(LibraryPath)">
       <MakeDir Directories="$(SoFileLocation)" />
-      <CLinkerTask LinkerPath="$(LinkerPath)" ObjectFiles="@(ObjectFiles)" Flags="@(LinkFlags)" Output="$(SoFileLocation)/$(LibraryPath)" />
+      <CLinkerTask LinkerPath="$(LinkerPath)" ObjectFiles="@(ObjectFiles)" Flags="@(LinkFlags)" Output="$(SoFileLocation)/$(LibraryPath)" ContinueOnError="false"/>
   </Target>
 
   <Target Name="Build" DependsOnTargets="Link">

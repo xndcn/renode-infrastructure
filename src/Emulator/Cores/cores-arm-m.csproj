@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="CompileTranslationLib;Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Deterministic>false</Deterministic>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -8,7 +19,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <AssemblyName>cores-arm-m</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(NET) != 'true'">v4.5</TargetFrameworkVersion>
     <PropertiesLocation>..\..\..\..\..\output\properties.csproj</PropertiesLocation>
   </PropertyGroup>
   <Import Project="$(PropertiesLocation)" />
@@ -92,7 +103,7 @@
       <Name>Extensions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="$(NET) != 'true'">
     <Reference Include="System" />
   </ItemGroup>
   <ProjectExtensions>
@@ -109,4 +120,5 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'" />
 </Project>

@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Deterministic>false</Deterministic>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,7 +20,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Antmicro.Renode.UI</RootNamespace>
     <AssemblyName>UI</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(NET) != 'true'">v4.5</TargetFrameworkVersion>
     <PropertiesLocation>..\..\..\..\output\properties.csproj</PropertiesLocation>
   </PropertyGroup>
   <Import Project="$(PropertiesLocation)" />
@@ -36,23 +47,41 @@
   <PropertyGroup Condition=" $(GUI_DISABLED) == 'true' ">
     <DefineConstants>$(DefineConstants);GUI_DISABLED</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="$(NET) != 'true'">
     <Reference Include="PresentationFramework" Condition=" $(CurrentPlatform) == 'Windows'" />
     <Reference Include="PresentationCore" Condition=" $(CurrentPlatform) == 'Windows'" />
     <Reference Include="WindowsBase" Condition=" $(CurrentPlatform) == 'Windows'" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
-  <ItemGroup Condition=" $(CurrentPlatform) != 'Windows'">
+  <ItemGroup Condition=" $(CurrentPlatform) != 'Windows' And $(NET) != 'true'" >
     <Reference Include="Mono.Posix" />
   </ItemGroup>
-  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' ">
+  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' And $(NET) != 'true'">
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>glib-sharp-2.0</Package>
     </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="$(NET) == 'true'">
+    <PackageReference Include="Microsoft.CSharp">
+      <Version>4.7.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" $(OS) != 'Windows_NT' And $(NET) == 'true'">
+    <PackageReference Include="Mono.Posix.NETStandard">
+      <Version>1.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' And $(NET) == 'true'">
+    <PackageReference Include="GdkSharp">
+      <Version>3.24.24.34</Version>
+    </PackageReference>
+    <PackageReference Include="GLibSharp">
+      <Version>3.24.24.34</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CLIProgressMonitor.cs" />
@@ -91,7 +120,7 @@
     <Compile Include="VideoAnalyzer\VideoAnalyzer.cs" />
     <Compile Include="VideoAnalyzer\DummyVideoAnalyzer.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="$(NET) != 'true'"/>
   <Import Project="$(MSBuildProjectDirectory)\BuildAdditionalProjects-UI.csproj.targets" Condition="Exists('$(MSBuildProjectDirectory)\BuildAdditionalProjects-UI.csproj.targets')" />
   <ProjectExtensions>
     <MonoDevelop>
@@ -127,8 +156,12 @@
       <Project>{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}</Project>
       <Name>Xwt</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' ">
+    <ProjectReference Include="..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' And $(NET) != 'true'">
       <Project>{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}</Project>
+      <Name>Xwt.Gtk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk3.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' And $(NET) == 'true'">
+      <Project>{3B25FD1F-CEBA-4450-8893-DC330FDB56A7}</Project>
       <Name>Xwt.Gtk</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\lib\xwt\Xwt.WPF\Xwt.WPF.csproj" Condition=" $(CurrentPlatform) == 'Windows' And $(GUI_DISABLED) != 'true' ">
@@ -144,4 +177,5 @@
       <Name>ELFSharp</Name>
     </ProjectReference>
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'" />
 </Project>

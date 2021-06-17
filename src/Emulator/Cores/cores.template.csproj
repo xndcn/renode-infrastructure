@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="EnvironmentTask" />
+    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="$(NET) != 'true'"/>
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="EnvironmentTask" Condition="$(NET) != 'true'"/>
+    <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/net5.0/CCTask.dll" TaskName="EnvironmentTask" Condition="$(NET) == 'true'"/>
 
     <Target Name="_PrepareProperties" DependsOnTargets="SetEndianess">
         <Error Text="Configuration not provided" Condition=" $(Configuration) == '' " />

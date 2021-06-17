@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CCompilerTask"/>
+  <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/CCTask.dll" TaskName="CCompilerTask" Condition="$(NET) != 'true'"/>
+  <UsingTask AssemblyFile="$(MSBuildProjectDirectory)/../../../../../lib/cctask/CCTask/bin/Release/net5.0/CCTask.dll" TaskName="CCompilerTask" Condition="$(NET) == 'true'"/>
 
   <PropertyGroup>
     <Architecture Condition=" $(Architecture) == '' ">i386</Architecture>
@@ -43,6 +44,8 @@
 
   <Target Name="Compile" Inputs="@(InputFiles)" Outputs="@(ObjectFiles)" DependsOnTargets="_VerifyProperties">
     <CCompilerTask CompilerPath="$(CompilerPath)" Parallel="true" Sources="@(CSources)" Flags="@(CompilationFlags)" ObjectFilesDirectory="$(ObjectFilesDirectory)"/>
+    <Exec Command="sleep 5" Condition="$(NET) == 'true' And $(CurrentPlatform) != 'Windows' "/>
+    <Exec Command="powershell &quot;sleep 5&quot;" Condition="$(NET) == 'true' And $(CurrentPlatform) == 'Windows' "/>
   </Target>
 
   <Target Name="Build" Inputs="@(ObjectFiles)" Outputs="$(TcgOutput)" DependsOnTargets="Compile">
@@ -51,7 +54,7 @@
       <ObjectFilesString>@(ObjectFiles->'%(Identity)', ' ')</ObjectFilesString>
     </PropertyGroup>
     <MakeDir Directories="$(OutputDirectory)"/>
-    <Exec Command="$(ArPath) rcs $(TcgOutput) $(ObjectFilesString)" Condition=" !Exists('$(TcgOutput)') Or '$(ObjectFilesString)' != '' "/>
+    <Exec Command="$(ArPath) rcs $(TcgOutput) $(ObjectFilesString)" Condition=" !Exists('$(TcgOutput)') Or '$(ObjectFilesString)' != '' " ContinueOnError="false"/>
   </Target>
 
   <Target Name="Clean">

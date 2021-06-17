@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Deterministic>false</Deterministic>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,7 +20,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Antmicro.Renode.Tests.UnitTests</RootNamespace>
     <AssemblyName>UnitTests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(NET) != 'true'">v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <LangVersion>7</LangVersion>
@@ -98,20 +109,36 @@
     <Compile Include="Mocks\MachineTestPeripheral.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq">
       <HintPath>..\..\..\..\..\..\..\lib\resources\libraries\Moq.dll</HintPath>
     </Reference>
     <Reference Include="IronPython">
       <HintPath>..\..\..\..\..\..\..\lib\resources\libraries\IronPython.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="$(NET) != 'true'">
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="nunit.framework">
       <HintPath>..\..\..\..\..\..\..\lib\resources\tools\nunit3\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup Condition="$(NET) == 'true'">
+    <PackageReference Include="Microsoft.CSharp">
+      <Version>4.7.0</Version>
+    </PackageReference>
+    <PackageReference Include="NUnit">
+      <Version>3.13.1</Version>
+    </PackageReference>
+    <PackageReference Include="NUnit3TestAdapter">
+      <Version>3.17.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk">
+      <Version>16.9.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="$(NET) != 'true'"/>
   <ItemGroup>
     <ProjectReference Include="..\..\Emulator.csproj">
       <Project>{2901AECB-A54F-4FD8-9AC1-033D86DC7257}</Project>
@@ -152,4 +179,5 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'" />
 </Project>

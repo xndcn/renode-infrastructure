@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <BaseIntermediateOutputPath>obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
+  <PropertyGroup Condition="$(NET) == 'true'">
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Deterministic>false</Deterministic>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -7,7 +18,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Antmicro.Renode</RootNamespace>
     <AssemblyName>Emulator</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion Condition="$(NET) != 'true'">v4.5</TargetFrameworkVersion>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <PropertiesLocation>..\..\..\..\..\output\properties.csproj</PropertiesLocation>
@@ -43,13 +54,33 @@
       <!-- See the note near the IronPython.StdLib reference -->
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Reference Include="Mono.CSharp">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\mcs.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dynamic">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\Microsoft.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Linq.Expressions">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\Mono.Linq.Expressions.dll</HintPath>
+    </Reference>
+    <Reference Include="Nini">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\Nini.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\Lucene.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="LZ4">
+      <HintPath>..\..\..\..\..\lib\resources\libraries\LZ4.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="$(NET) != 'true'">
     <Reference Include="PresentationCore" Condition=" $(CurrentPlatform) == 'Windows'" />
     <Reference Include="WindowsBase" Condition=" $(CurrentPlatform) == 'Windows'" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Mono.CSharp" >
-      <HintPath>..\..\..\..\..\lib\resources\libraries\mcs.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\..\..\..\..\lib\resources\libraries\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -67,41 +98,59 @@
     <Reference Include="IronPython.Modules">
       <HintPath>..\..\..\..\..\lib\resources\libraries\IronPython.Modules.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Dynamic">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\Microsoft.Dynamic.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\Microsoft.Scripting.dll</HintPath>
-    </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="Mono.Linq.Expressions">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\Mono.Linq.Expressions.dll</HintPath>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
     <Reference Include="Dynamitey">
       <HintPath>..\..\..\..\..\lib\resources\libraries\Dynamitey.dll</HintPath>
     </Reference>
-    <Reference Include="Nini">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\Nini.dll</HintPath>
-    </Reference>
-    <Reference Include="Lucene.Net">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\Lucene.Net.dll</HintPath>
-    </Reference>
-    <Reference Include="LZ4">
-      <HintPath>..\..\..\..\..\lib\resources\libraries\LZ4.dll</HintPath>
-    </Reference>
   </ItemGroup>
-  <ItemGroup Condition="$(CurrentPlatform) != 'Windows'">
+  <ItemGroup Condition="$(CurrentPlatform) != 'Windows' And $(NET) != 'true'">
     <Reference Include="Mono.Posix" />
   </ItemGroup>
-  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' ">
+  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' And $(NET) != 'true'">
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>gdk-sharp-2.0</Package>
     </Reference>
     <Reference Include="glib-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <Package>glib-sharp-2.0</Package>
     </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="$(NET) == 'true'">
+    <PackageReference Include="Microsoft.CSharp">
+      <Version>4.7.0</Version>
+    </PackageReference>
+    <PackageReference Include="Mono.Cecil">
+      <Version>0.11.3</Version>
+    </PackageReference>    
+    <PackageReference Include="IronPython">
+      <Version>2.7.11</Version>
+    </PackageReference>    
+    <PackageReference Include="System.Drawing.Common">
+      <Version>5.0.2</Version>
+    </PackageReference>    
+    <PackageReference Include="Dynamitey">
+      <Version>2.0.10.189</Version>
+    </PackageReference>    
+    <PackageReference Include="Microsoft.CodeAnalysis.Compilers">
+      <Version>3.9.0</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp">
+      <Version>3.9.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" $(OS) != 'Windows_NT' And $(NET) == 'true'">
+    <PackageReference Include="Mono.Posix.NETStandard">
+      <Version>1.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition=" $(CurrentPlatform) != Windows And $(GUI_DISABLED) != 'true' And $(NET) == 'true'">
+    <PackageReference Include="GdkSharp">
+      <Version>3.24.24.34</Version>
+    </PackageReference>
+    <PackageReference Include="GLibSharp">
+      <Version>3.24.24.34</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Utilities\Packets\Packet.cs" />
@@ -232,7 +281,8 @@
     <Compile Include="Core\Structure\ITheOnlyPossibleRegistrationPoint.cs" />
     <Compile Include="Peripherals\UART\UARTHub.cs" />
     <Compile Include="Peripherals\IRQControllers\IIRQController.cs" />
-    <Compile Include="Utilities\AdHocCompiler.cs" />
+    <Compile Include="Utilities\AdHocCompiler.cs" Condition="$(NET) != 'true'"/>
+    <Compile Include="Utilities\AdHocCompiler_5NET.cs" Condition="$(NET) == 'true'"/>
     <Compile Include="Core\EmulationManager.cs" />
     <Compile Include="Core\PeripheralTreeEntry.cs" />
     <Compile Include="Logging\ILoggerBackend.cs" />
@@ -549,7 +599,7 @@
     <Compile Include="Utilities\FilePath.cs" />
     <Compile Include="Peripherals\CPU\CpuAbortException.cs" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" Condition="$(NET) != 'true'"/>
   <ItemGroup />
   <ProjectExtensions>
     <MonoDevelop>
@@ -600,8 +650,12 @@
       <Project>{92494904-35FA-4DC9-BDE9-3A3E87AC49D3}</Project>
       <Name>Xwt</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' ">
+    <ProjectReference Include="..\..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' And $(NET) != 'true'">
       <Project>{C3887A93-B2BD-4097-8E2F-3A063EFF32FD}</Project>
+      <Name>Xwt.Gtk</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\lib\xwt\Xwt.Gtk\Xwt.Gtk3.csproj" Condition=" $(CurrentPlatform) != 'Windows' And $(GUI_DISABLED) != 'true' And $(NET) == 'true'">
+      <Project>{3B25FD1F-CEBA-4450-8893-DC330FDB56A7}</Project>
       <Name>Xwt.Gtk</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\..\lib\xwt\Xwt.WPF\Xwt.WPF.csproj" Condition=" $(CurrentPlatform) == 'Windows' And $(GUI_DISABLED) != 'true' ">
@@ -617,4 +671,5 @@
     <Folder Include="Peripherals\Sensor\" />
     <Folder Include="Utilities\GDB\" />
   </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'" />
 </Project>
