@@ -2642,6 +2642,7 @@ restart:
             StoppedAtWatchpoint = 0x10004,
             ReturnRequested = 0x10005,
             ExternalMmuFault = 0x10006,
+            CpuAborted = 0x10007,
             // tlib returns int32, so this value won't overlap with an actual result
             Aborted = ulong.MaxValue
         }
@@ -2666,6 +2667,17 @@ restart:
                 pauseGuard.Enter();
                 lastTlibResult = (ExecutionResult)TlibExecute(checked((int)numberOfInstructionsToExecute));
                 pauseGuard.Leave();
+
+                // Exception thrown from tlib_abort() is not caught on CoreCLR on Unix
+                // so returned value is used instead. 
+                // https://github.com/dotnet/runtime/issues/4756#issuecomment-163380312 
+                if(lastTlibResult == ExecutionResult.CpuAborted)
+                {
+                    this.NoisyLog("CPU abort detected, halting.");
+                    isAborted = true;
+                    InvokeHalted(new HaltArguments(HaltReason.Abort, Id));
+                    return ExecutionResult.Aborted;
+                }
             }
             catch(CpuAbortException)
             {
