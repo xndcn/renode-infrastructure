@@ -39,6 +39,7 @@ namespace Antmicro.Renode.Core
         #if !NET
             "clr.AddReference('IronPython.StdLib')",
         #endif
+            "clr.AddReference('System.Console')",
             "import Antmicro.Renode",
             "import System",
             "import time",
