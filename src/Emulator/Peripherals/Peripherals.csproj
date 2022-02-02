@@ -5,7 +5,7 @@
   </PropertyGroup>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="$(NET) == 'true'"/>
   <PropertyGroup Condition="$(NET) == 'true'">
-    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net5.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(OS) != 'Windows_NT'">net6.0</TargetFrameworks>
     <TargetFrameworks Condition="$(OS) == 'Windows_NT'">net5.0-windows10.0.17763.0</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -499,7 +499,7 @@
       <Project>{55ABBA4C-AAF9-4726-A592-0C92436CEC92}</Project>
       <Name>PacketDotNet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\..\lib\bc-csharp\crypto\crypto.Net45.expanded.csproj">
+    <ProjectReference Include="..\..\..\..\..\lib\bc-csharp\crypto\crypto.Net45.csproj">
       <Project>{45473847-8AF8-4BAF-B768-442C6875B8CF}</Project>
       <Name>crypto</Name>
     </ProjectReference>
