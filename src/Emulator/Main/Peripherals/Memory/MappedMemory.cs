@@ -324,6 +324,35 @@ namespace Antmicro.Renode.Peripherals.Memory
             }
         }
 
+        public void InitWithRepeatingData(byte[] data)
+        {
+            var buf = Enumerable.Repeat(data.AsEnumerable(), (SegmentSize + data.Length - 1) / data.Length)
+                .Aggregate((acc, a) => acc.Concat(a))
+                .Take(SegmentSize)
+                .ToArray();
+
+            for(var i = 0; i < segments.Length; ++i)
+            {
+                WriteBytes(i * SegmentSize, buf);
+            }
+        }
+
+        public void InitWithConstantDoubleWord(int w)
+        {
+            InitWithRepeatingData(BitConverter.GetBytes(w));
+        }
+
+        public void InitWithConstantWord(short w)
+        {
+            InitWithRepeatingData(BitConverter.GetBytes(w));
+        }
+
+        public void InitWithConstantByte(byte b)
+        {
+            InitWithRepeatingData(new byte[] { b });
+        }
+
+
         public void ZeroAll()
         {
             foreach(var segment in segments.Where(x => x != IntPtr.Zero))
