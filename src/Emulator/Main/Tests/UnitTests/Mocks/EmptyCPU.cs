@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2010-2018 Antmicro
+// Copyright (c) 2010-2022 Antmicro
 // Copyright (c) 2011-2015 Realtime Embedded
 //
 // This file is licensed under the MIT License.
@@ -8,8 +8,9 @@
 using System;
 using Antmicro.Migrant;
 using Antmicro.Renode.Core;
-using Antmicro.Renode.Peripherals.CPU;
 using Antmicro.Renode.Peripherals.Bus;
+using Antmicro.Renode.Peripherals.CPU;
+using Antmicro.Renode.Peripherals.Miscellaneous;
 
 namespace Antmicro.Renode.UnitTests.Mocks
 {
@@ -47,7 +48,7 @@ namespace Antmicro.Renode.UnitTests.Mocks
         public virtual void UnmapMemory(Range range)
         {
         }
-
+        
         public void SetPageAccessViaIo(ulong address)
         {
         }

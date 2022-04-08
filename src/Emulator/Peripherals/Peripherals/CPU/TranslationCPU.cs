@@ -24,6 +24,7 @@ using Antmicro.Renode.Logging.Profiling;
 using Antmicro.Renode.Peripherals.Bus;
 using Antmicro.Renode.Peripherals.CPU.Disassembler;
 using Antmicro.Renode.Peripherals.CPU.Registers;
+using Antmicro.Renode.Peripherals.Miscellaneous;
 using Antmicro.Renode.Time;
 using Antmicro.Renode.Utilities;
 using Antmicro.Renode.Utilities.Binding;
@@ -34,7 +35,7 @@ using Antmicro.Renode.Disassembler.LLVM;
 
 namespace Antmicro.Renode.Peripherals.CPU
 {
-    public abstract partial class TranslationCPU : IdentifiableObject, IGPIOReceiver, ICpuSupportingGdb, INativeUnwindable, IDisposable, IDisassemblable, ITimeSink
+    public abstract partial class TranslationCPU : IdentifiableObject, IGPIOReceiver, ICpuSupportingGdb, ICPUWithExternalMmu, INativeUnwindable, IDisposable, IDisassemblable, ITimeSink
     {
         public Endianess Endianness { get; protected set; }
 
@@ -62,12 +63,14 @@ namespace Antmicro.Renode.Peripherals.CPU
             translationCacheSync = new object();
             pauseGuard = new CpuThreadPauseGuard(this);
             decodedIrqs = new Dictionary<Interrupt, HashSet<int>>();
+            attachedMmus = new Dictionary<MmuType, ExternalMmuBase>();
             hooks = new Dictionary<ulong, HookDescriptor>();
             currentMappings = new List<SegmentMapping>();
             isPaused = true;
             InitializeRegisters();
             Init();
             InitDisas();
+            externalMmuWindowsCount = GetExternalMmuWindowsCount;
         }
 
         public bool TbCacheEnabled
@@ -177,6 +180,8 @@ namespace Antmicro.Renode.Peripherals.CPU
 
         // This value should only be read in CPU hooks (during execution of translated code).
         public uint CurrentBlockDisassemblyFlags => TlibGetCurrentTbDisasFlags();
+        
+        public uint GetExternalMmuWindowsCount => TlibGetMmuWindowsCount();
 
         public bool ThreadSentinelEnabled { get; set; }
 
@@ -665,6 +670,11 @@ namespace Antmicro.Renode.Peripherals.CPU
             interruptBeginHook += hook;
         }
 
+        public void AddHookOnMmuFault(Action<ulong, AccessType, bool> hook)
+        {
+            mmuFaultHook += hook;
+        }
+
         public void AddHookAtInterruptEnd(Action<ulong> hook)
         {
             if(Architecture != "riscv")
@@ -810,6 +820,87 @@ namespace Antmicro.Renode.Peripherals.CPU
             }
         }
 
+        private void AssertExternalMmuWindowInRange(uint index)
+        {
+            if(index > externalMmuWindowsCount)
+            {
+                throw new RecoverableException($"Window index to high, maximum number: {externalMmuWindowsCount}, got {index}");
+            }
+        }
+
+        public void EnableExternalWindowMmu(bool value)
+        {
+            TlibEnableExternalWindowMmu(value ? 1u : 0u);
+        }
+
+        public void AttachMmu(ExternalMmuBase mmu, MmuType type)
+        {
+            if(attachedMmus.ContainsKey(type))
+            {
+                throw new ConstructionException($"Trying to attach second MMU of the same type '{type}'");
+            }
+            attachedMmus[type] = mmu;
+        }
+
+        public uint AcquireExternalMmuWindow()
+        {
+            return TlibAcquireMmuWindow();
+        }
+
+        public void ResetMmuWindow(uint index)
+        {
+            AssertExternalMmuWindowInRange(index);
+            TlibResetMmuWindow(index);
+        }
+
+        public void SetMmuWindowAddend(uint index, ulong addend)
+        {
+            AssertExternalMmuWindowInRange(index);
+            TlibSetMmuWindowAddend(index, addend);
+        }
+
+        public void SetMmuWindowStart(uint index, ulong addr_start)
+        {
+            AssertExternalMmuWindowInRange(index);
+            TlibSetMmuWindowStart(index, addr_start);
+        }
+
+        public void SetMmuWindowEnd(uint index, ulong end_addr)
+        {
+            AssertExternalMmuWindowInRange(index);
+            TlibSetMmuWindowEnd(index, end_addr);
+        }
+
+        public void SetMmuWindowPrivileges(uint index, uint permissions)
+        {
+            AssertExternalMmuWindowInRange(index);
+            TlibSetWindowPrivileges(index, permissions);
+        }
+
+        public ulong GetMmuWindowAddend(uint index)
+        {
+            AssertExternalMmuWindowInRange(index);
+            return TlibGetMmuWindowAddend(index);
+        }
+
+        public ulong GetMmuWindowStart(uint index)
+        {
+            AssertExternalMmuWindowInRange(index);
+            return TlibGetMmuWindowStart(index);
+        }
+
+        public ulong GetMmuWindowEnd(uint index)
+        {
+            AssertExternalMmuWindowInRange(index);
+            return TlibGetMmuWindowEnd(index);
+        }
+
+        public uint GetMmuWindowPrivileges(uint index)
+        {
+            AssertExternalMmuWindowInRange(index);
+            return TlibGetWindowPrivileges(index);
+        }
+
         private void CheckIfOnSynchronizedThread()
         {
             if(Thread.CurrentThread.ManagedThreadId != cpuThread.ManagedThreadId)
@@ -935,6 +1026,22 @@ namespace Antmicro.Renode.Peripherals.CPU
         private void OnInterruptBegin(ulong interruptIndex)
         {
             interruptBeginHook?.Invoke(interruptIndex);
+        }
+
+        [Export]
+        private void MmuFaultThrownAt(ulong address, int accessType)
+        {
+            this.Log(LogLevel.Noisy, "External MMU fault at 0x{0:X} when trying to access as {1}", address, (AccessType)accessType);
+
+            if((AccessType)accessType == AccessType.Execute && attachedMmus.TryGetValue(MmuType.InstructionsOnly, out var instructionMmu))
+            {
+                instructionMmu.TriggerInterrupt();
+            }
+            else if(attachedMmus.TryGetValue(MmuType.General, out var standardMmu))
+            {
+                standardMmu.TriggerInterrupt();
+            }
+            mmuFaultHook?.Invoke(address, (AccessType)accessType, attachedMmus.ContainsKey(MmuType.InstructionsOnly));
         }
 
         [Export]
@@ -1359,6 +1466,7 @@ namespace Antmicro.Renode.Peripherals.CPU
         private Action<ulong, uint> blockFinishedHook;
         private Action<ulong> interruptBeginHook;
         private Action<ulong> interruptEndHook;
+        private Action<ulong, AccessType, bool> mmuFaultHook;
         private Action<uint, ulong> memoryAccessHook;
 
         private List<SegmentMapping> currentMappings;
@@ -1750,7 +1858,7 @@ namespace Antmicro.Renode.Peripherals.CPU
         }
 
         // 649:  Field '...' is never assigned to, and will always have its default value null
-        #pragma warning disable 649
+#pragma warning disable 649
 
         [Import]
         private ActionUInt32 TlibSetChainingEnabled;
@@ -1892,7 +2000,43 @@ namespace Antmicro.Renode.Peripherals.CPU
         [Import(UseExceptionWrapper = false)]
         private Action TlibUnwind;
 
-        #pragma warning restore 649
+        [Import]
+        private FuncUInt32 TlibGetMmuWindowsCount;
+
+        [Import]
+        private ActionUInt32 TlibEnableExternalWindowMmu;
+
+        [Import]
+        private FuncUInt32 TlibAcquireMmuWindow;
+
+        [Import]
+        private ActionUInt32 TlibResetMmuWindow;
+
+        [Import]
+        private ActionUInt32UInt64 TlibSetMmuWindowStart;
+
+        [Import]
+        private ActionUInt32UInt64 TlibSetMmuWindowEnd;
+
+        [Import]
+        private ActionUInt32UInt32 TlibSetWindowPrivileges;
+
+        [Import]
+        private ActionUInt32UInt64 TlibSetMmuWindowAddend;
+
+        [Import]
+        private FuncUInt64UInt32 TlibGetMmuWindowStart;
+
+        [Import]
+        private FuncUInt64UInt32 TlibGetMmuWindowEnd;
+
+        [Import]
+        private FuncUInt32UInt32 TlibGetWindowPrivileges;
+
+        [Import]
+        private FuncUInt64UInt32 TlibGetMmuWindowAddend;
+
+#pragma warning restore 649
 
         protected const int DefaultTranslationCacheSize = 32 * 1024 * 1024;
 
@@ -1986,6 +2130,7 @@ namespace Antmicro.Renode.Peripherals.CPU
         protected static readonly Exception InvalidInterruptNumberException = new InvalidOperationException("Invalid interrupt number.");
 
         private const int DefaultMaximumBlockSize = 0x7FF;
+        private readonly uint externalMmuWindowsCount;
 
         private void ExecuteHooks(ulong address)
         {
@@ -2473,6 +2618,7 @@ restart:
         private bool isAnyInactiveHook;
         private Dictionary<ulong, HookDescriptor> hooks;
         private Dictionary<Interrupt, HashSet<int>> decodedIrqs;
+        private readonly Dictionary<MmuType, ExternalMmuBase> attachedMmus;
         private readonly CpuBitness bitness;
         private bool dispatcherRestartRequested;
         private readonly object cpuThreadBodyLock = new object();
