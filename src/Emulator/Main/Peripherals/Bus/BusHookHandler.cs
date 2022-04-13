@@ -9,7 +9,7 @@ using Antmicro.Renode.Peripherals.CPU;
 
 namespace Antmicro.Renode.Peripherals.Bus
 {
-    public delegate void BusHookDelegate(ICpuSupportingGdb cpu, ulong address, SysbusAccessWidth access, uint value);
+    public delegate void BusHookDelegate(ICPUSupportingGdb cpu, ulong address, SysbusAccessWidth access, uint value);
 
     public class BusHookHandler
     {
@@ -20,7 +20,7 @@ namespace Antmicro.Renode.Peripherals.Bus
             Enabled = true;
         }
 
-        public void Invoke(ICpuSupportingGdb cpu, ulong currentAddress, SysbusAccessWidth currentWidth, uint value = 0)
+        public void Invoke(ICPUSupportingGdb cpu, ulong currentAddress, SysbusAccessWidth currentWidth, uint value = 0)
         {
             if((currentWidth & width) != 0)
             {

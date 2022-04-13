@@ -47,7 +47,7 @@ namespace Antmicro.Renode.Hooks
             Source = new Lazy<ScriptSource>(() => Engine.CreateScriptSourceFromString(Script));
         }
 
-        public Action<ICpuSupportingGdb, ulong> Hook { get; private set; }
+        public Action<ICPUSupportingGdb, ulong> Hook { get; private set; }
 
         public Action<ulong, uint> HookWithSize { get; private set; }
 

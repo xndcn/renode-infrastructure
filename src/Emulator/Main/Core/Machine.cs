@@ -792,7 +792,7 @@ namespace Antmicro.Renode.Core
             StartGdbServer(port, autostartEmulation, null, blockOnStep);
         }
 
-        public void StartGdbServer(int port, bool autostartEmulation = false, ICpuSupportingGdb cpu = null, bool blockOnStep = true)
+        public void StartGdbServer(int port, bool autostartEmulation = false, ICPUSupportingGdb cpu = null, bool blockOnStep = true)
         {
             try
             {
@@ -802,7 +802,7 @@ namespace Antmicro.Renode.Core
                     {
                         throw new RecoverableException(string.Format("GDB server already started for this machine on port :{0}", port));
                     }
-                    var cpus = SystemBus.GetCPUs().Cast<ICpuSupportingGdb>();
+                    var cpus = SystemBus.GetCPUs().Cast<ICPUSupportingGdb>();
                     if(!cpus.Any())
                     {
                         throw new RecoverableException("Cannot start GDB server with no CPUs. Did you forget to load the platform description first?");

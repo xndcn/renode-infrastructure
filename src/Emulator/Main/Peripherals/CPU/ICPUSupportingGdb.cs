@@ -189,7 +189,7 @@ namespace Antmicro.Renode.Peripherals.CPU
         public uint Value { get; }
     }
 
-    public interface ICpuSupportingGdb : ICPUWithHooks, IControllableCPU
+    public interface ICPUSupportingGdb : ICPUWithHooks, IControllableCPU
     {
         ulong Step(int count = 1, bool? blocking = null);
         ExecutionMode ExecutionMode { get; set; }

@@ -35,7 +35,7 @@ using Antmicro.Renode.Disassembler.LLVM;
 
 namespace Antmicro.Renode.Peripherals.CPU
 {
-    public abstract partial class TranslationCPU : IdentifiableObject, IGPIOReceiver, ICpuSupportingGdb, ICPUWithExternalMmu, INativeUnwindable, IDisposable, IDisassemblable, ITimeSink
+    public abstract partial class TranslationCPU : IdentifiableObject, IGPIOReceiver, ICPUSupportingGdb, ICPUWithExternalMmu, INativeUnwindable, IDisposable, IDisassemblable, ITimeSink
     {
         public Endianess Endianness { get; protected set; }
 
@@ -844,7 +844,12 @@ namespace Antmicro.Renode.Peripherals.CPU
 
         public uint AcquireExternalMmuWindow()
         {
-            return TlibAcquireMmuWindow();
+            var acquiredWindowIndex = TlibAcquireMmuWindow();
+            if(acquiredWindowIndex == externalMmuWindowsCount - 1)
+            {
+                this.Log(LogLevel.Warning, "Acquired the last available window. Maximum windows count is {0}", externalMmuWindowsCount);
+            }
+            return acquiredWindowIndex;
         }
 
         public void ResetMmuWindow(uint index)
@@ -1130,7 +1135,7 @@ namespace Antmicro.Renode.Peripherals.CPU
             }
         }
 
-        public void AddHook(ulong addr, Action<ICpuSupportingGdb, ulong> hook)
+        public void AddHook(ulong addr, Action<ICPUSupportingGdb, ulong> hook)
         {
             lock(hooks)
             {
@@ -1144,7 +1149,7 @@ namespace Antmicro.Renode.Peripherals.CPU
             }
         }
 
-        public void RemoveHook(ulong addr, Action<ICpuSupportingGdb, ulong> hook)
+        public void RemoveHook(ulong addr, Action<ICPUSupportingGdb, ulong> hook)
         {
             lock(hooks)
             {
@@ -2630,7 +2635,7 @@ restart:
             {
                 this.cpu = cpu;
                 this.address = address;
-                callbacks = new HashSet<Action<ICpuSupportingGdb, ulong>>();
+                callbacks = new HashSet<Action<ICPUSupportingGdb, ulong>>();
                 IsNew = true;
             }
 
@@ -2644,12 +2649,12 @@ restart:
                 }
             }
 
-            public void AddCallback(Action<ICpuSupportingGdb, ulong> action)
+            public void AddCallback(Action<ICPUSupportingGdb, ulong> action)
             {
                 callbacks.Add(action);
             }
 
-            public bool RemoveCallback(Action<ICpuSupportingGdb, ulong> action)
+            public bool RemoveCallback(Action<ICPUSupportingGdb, ulong> action)
             {
                 var result = callbacks.Remove(action);
                 if(result && IsEmpty)
@@ -2694,7 +2699,7 @@ restart:
 
             private readonly ulong address;
             private readonly TranslationCPU cpu;
-            private readonly HashSet<Action<ICpuSupportingGdb, ulong>> callbacks;
+            private readonly HashSet<Action<ICPUSupportingGdb, ulong>> callbacks;
         }
 
         private class Synchronizer

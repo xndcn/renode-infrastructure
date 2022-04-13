@@ -14,7 +14,7 @@ namespace Antmicro.Renode.Utilities.GDB
 {
     public class GdbStub : IDisposable, IExternal
     {
-        public GdbStub(Machine machine, IEnumerable<ICpuSupportingGdb> cpus, int port, bool autostartEmulation, bool blockOnStep)
+        public GdbStub(Machine machine, IEnumerable<ICPUSupportingGdb> cpus, int port, bool autostartEmulation, bool blockOnStep)
         {
             this.cpus = cpus;
             Port = port;
@@ -55,12 +55,12 @@ namespace Antmicro.Renode.Utilities.GDB
             LogsEnabled = false;
         }
 
-        public void AttachCPU(ICpuSupportingGdb cpu)
+        public void AttachCPU(ICPUSupportingGdb cpu)
         {
             commandsManager.AttachCPU(cpu);
         }
 
-        public bool IsCPUAttached(ICpuSupportingGdb cpu)
+        public bool IsCPUAttached(ICPUSupportingGdb cpu)
         {
             return commandsManager.IsCPUAttached(cpu);
         }
@@ -215,7 +215,7 @@ namespace Antmicro.Renode.Utilities.GDB
         }
 
         private readonly PacketBuilder pcktBuilder;
-        private readonly IEnumerable<ICpuSupportingGdb> cpus;
+        private readonly IEnumerable<ICPUSupportingGdb> cpus;
         private readonly SocketServerProvider terminal;
         private readonly CommandsManager commandsManager;
         private readonly CommunicationHandler commHandler;

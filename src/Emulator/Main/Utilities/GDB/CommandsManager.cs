@@ -17,7 +17,7 @@ namespace Antmicro.Renode.Utilities.GDB
 {
     public class CommandsManager
     {
-        public CommandsManager(Machine machine, IEnumerable<ICpuSupportingGdb> cpus, bool blockOnStep)
+        public CommandsManager(Machine machine, IEnumerable<ICPUSupportingGdb> cpus, bool blockOnStep)
         {
             availableCommands = new HashSet<CommandDescriptor>();
             activeCommands = new HashSet<Command>();
@@ -27,7 +27,7 @@ namespace Antmicro.Renode.Utilities.GDB
             BlockOnStep = blockOnStep;
 
             commandsCache = new Dictionary<string, Command>();
-            ManagedCpus = new Dictionary<uint, ICpuSupportingGdb>();
+            ManagedCpus = new Dictionary<uint, ICPUSupportingGdb>();
             foreach(var cpu in cpus)
             {
                 if(!TryAddManagedCPU(cpu))
@@ -38,7 +38,7 @@ namespace Antmicro.Renode.Utilities.GDB
             selectedCpuNumber = ManagedCpus.OrderBy(x => x.Key).First().Key;
         }
 
-        public void AttachCPU(ICpuSupportingGdb cpu)
+        public void AttachCPU(ICPUSupportingGdb cpu)
         {
             if(!CanAttachCPU)
             {
@@ -51,7 +51,7 @@ namespace Antmicro.Renode.Utilities.GDB
             InvalidateCompiledFeatures();
         }
 
-        public bool IsCPUAttached(ICpuSupportingGdb cpu)
+        public bool IsCPUAttached(ICPUSupportingGdb cpu)
         {
             return ManagedCpus.ContainsValue(cpu);
         }
@@ -147,10 +147,10 @@ namespace Antmicro.Renode.Utilities.GDB
         }
 
         public Machine Machine { get; private set; }
-        public Dictionary<uint, ICpuSupportingGdb> ManagedCpus { get; set; }
+        public Dictionary<uint, ICPUSupportingGdb> ManagedCpus { get; set; }
         public bool ShouldAutoStart { get; set; }
         public bool CanAttachCPU { get; set; }
-        public ICpuSupportingGdb Cpu
+        public ICPUSupportingGdb Cpu
         {
             get
             {
@@ -228,7 +228,7 @@ namespace Antmicro.Renode.Utilities.GDB
             }
         }
 
-        private bool TryAddManagedCPU(ICpuSupportingGdb cpu)
+        private bool TryAddManagedCPU(ICPUSupportingGdb cpu)
         {
             if(IsCPUAttached(cpu))
             {

@@ -186,8 +186,8 @@ namespace Antmicro.Renode.Debug
             public ulong Begin;
             public bool HasEnd;
             public ulong End;
-            public Action<ICpuSupportingGdb, ulong> BeginCallback;
-            public Action<ICpuSupportingGdb, ulong> EndCallback;
+            public Action<ICPUSupportingGdb, ulong> BeginCallback;
+            public Action<ICPUSupportingGdb, ulong> EndCallback;
         }
     }
 }
