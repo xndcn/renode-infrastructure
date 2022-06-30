@@ -25,7 +25,7 @@ namespace Antmicro.Renode.Utilities.Binding
     {
         static NativeBinder()
         {
-            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
                 new AssemblyName(nameof(NativeBinder)), AssemblyBuilderAccess.Run);
             moduleBuilder = assemblyBuilder.DefineDynamicModule(nameof(NativeBinder));
         }
